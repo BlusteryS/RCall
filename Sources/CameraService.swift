@@ -18,6 +18,9 @@ final class CameraService: NSObject {
     private var configured = false
     private var configuring = false
     private var wantsRunning = false
+    private var pendingBurstCaptures = 0
+    private var burstInterval: TimeInterval = AppConfig.cameraBurstInterval
+    private var burstGeneration = 0
 
     init(store: SessionStore = .shared) {
         self.store = store
@@ -35,6 +38,8 @@ final class CameraService: NSObject {
     func stop() {
         sessionQueue.async {
             self.wantsRunning = false
+            self.pendingBurstCaptures = 0
+            self.burstGeneration += 1
             guard self.session.isRunning else {
                 return
             }
@@ -46,11 +51,16 @@ final class CameraService: NSObject {
         let safeCount = max(1, count)
         let safeInterval = max(0.1, interval)
 
-        for index in 0..<safeCount {
-            let delay = DispatchTimeInterval.milliseconds(Int(safeInterval * 1_000) * index)
-            sessionQueue.asyncAfter(deadline: .now() + delay) {
-                self.captureLocked()
+        sessionQueue.async {
+            guard self.configured, self.session.isRunning else {
+                self.fail(CameraError.capture)
+                return
             }
+
+            self.pendingBurstCaptures = safeCount - 1
+            self.burstInterval = safeInterval
+            self.burstGeneration += 1
+            self.captureLocked(generation: self.burstGeneration)
         }
     }
 
@@ -130,9 +140,15 @@ final class CameraService: NSObject {
         session.startRunning()
     }
 
-    private func captureLocked() {
+    private func captureLocked(generation: Int? = nil) {
+        if let generation, generation != burstGeneration {
+            return
+        }
+
         guard configured, session.isRunning else {
-            fail(CameraError.capture)
+            if generation == nil {
+                fail(CameraError.capture)
+            }
             return
         }
 
@@ -140,6 +156,20 @@ final class CameraService: NSObject {
         settings.maxPhotoDimensions = output.maxPhotoDimensions
         settings.photoQualityPrioritization = .quality
         output.capturePhoto(with: settings, delegate: self)
+    }
+
+    private func scheduleNextBurstCaptureIfNeeded() {
+        guard pendingBurstCaptures > 0, session.isRunning else {
+            pendingBurstCaptures = 0
+            return
+        }
+
+        pendingBurstCaptures -= 1
+        let generation = burstGeneration
+        let delay = DispatchTimeInterval.milliseconds(Int(burstInterval * 1_000))
+        sessionQueue.asyncAfter(deadline: .now() + delay) {
+            self.captureLocked(generation: generation)
+        }
     }
 
     func beginZoom() {
@@ -234,6 +264,10 @@ extension CameraService: AVCapturePhotoCaptureDelegate {
         error: Error?
     ) {
         if let error {
+            sessionQueue.async {
+                self.pendingBurstCaptures = 0
+                self.burstGeneration += 1
+            }
             DispatchQueue.main.async {
                 self.delegate?.cameraService(self, didFail: error)
             }
@@ -241,6 +275,10 @@ extension CameraService: AVCapturePhotoCaptureDelegate {
         }
 
         guard let data = photo.fileDataRepresentation() else {
+            sessionQueue.async {
+                self.pendingBurstCaptures = 0
+                self.burstGeneration += 1
+            }
             DispatchQueue.main.async {
                 self.delegate?.cameraService(self, didFail: CameraError.capture)
             }
@@ -249,6 +287,9 @@ extension CameraService: AVCapturePhotoCaptureDelegate {
 
         DispatchQueue.main.async {
             self.delegate?.cameraService(self, didCaptureJPEG: data)
+        }
+        sessionQueue.async {
+            self.scheduleNextBurstCaptureIfNeeded()
         }
     }
 }
