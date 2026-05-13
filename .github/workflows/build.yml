@@ -18,20 +18,24 @@ jobs:
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
 
-      - name: Install Theos
-        run: |
-          brew install ldid xz
-          git clone --recursive https://github.com/theos/theos.git "$RUNNER_TEMP/theos"
-          echo "THEOS=$RUNNER_TEMP/theos" >> "$GITHUB_ENV"
-
       - name: Build app
         run: |
-          make clean package THEOS="$THEOS" TARGET=iphone:clang:latest:26.0
+          xcodebuild \
+            -project RCall.xcodeproj \
+            -scheme RCall \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            build
 
       - name: Pack unsigned IPA
         run: |
           mkdir -p build/Payload
-          cp -R .theos/_/Applications/RCall.app build/Payload/
+          cp -R build/DerivedData/Build/Products/Release-iphoneos/RCall.app build/Payload/
           (cd build && zip -qry RCall-unsigned.ipa Payload)
 
       - name: Upload unsigned IPA

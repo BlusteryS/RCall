@@ -1,0 +1,349 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1174CFD2B41E472A87D25FBC /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE449DDB5B34A7990C44A3E /* APIClient.swift */; };
+		9608111D75A04818A41D62D7 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 430A1E586BEF4F9EB8F598BA /* AppConfig.swift */; };
+		F5B95369D2604407886BA397 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1D73DD23744FC5BAA2F481 /* AppDelegate.swift */; };
+		0EF416268DE74913A88CE1A6 /* BackgroundAudioKeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DDC718F2AFB4C17BECB9513 /* BackgroundAudioKeeper.swift */; };
+		ACD486CF5CDD4AC18752C0A5 /* CameraService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D486163F996477898165EBC /* CameraService.swift */; };
+		F2381894785140639ABC0535 /* CameraViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650C57CE10724A448384EC8E /* CameraViewController.swift */; };
+		B9CD4BB1D55D4783A7529606 /* CampusViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433642706E1F4A37A68B8DCD /* CampusViewController.swift */; };
+		1F75F85426E34E559EA977ED /* ChatInputViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9704DDDCAAF64C888DD8B1A8 /* ChatInputViewController.swift */; };
+		439347222F2240198246BD0C /* MainCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64200C046A824807976B2FF3 /* MainCoordinator.swift */; };
+		8655D41B13464C3CAEC68594 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C0EF0D52604615B024A80A /* Models.swift */; };
+		77B59190DF07417F9ED55287 /* OutgoingMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB0C5F0A2624E6AAD0FD2AA /* OutgoingMessages.swift */; };
+		7687DB1222EB423CB003BFF9 /* PinViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4161E0E542FC4E7187DE529F /* PinViewController.swift */; };
+		E62685F0526346149CD3416C /* RealtimeClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBB7D2D4B5984B9BBF94186E /* RealtimeClient.swift */; };
+		EB0FCC3C37AF43118D0BF2DC /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 901DF6C4EB2A48B2AE6884F8 /* SceneDelegate.swift */; };
+		AF253DD4033841D9A43CF177 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF0526AC0A34DB9BDC7D24E /* SessionStore.swift */; };
+		F359B1AAE5914A74B2995675 /* ToastPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C56BE932605D4BFEB67BA82D /* ToastPresenter.swift */; };
+		0B3839AF4774409EB2F149A6 /* UploadQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C9E477F65FD4BE5BDEDB659 /* UploadQueue.swift */; };
+		F6E6893ACA9F42BD9AF62649 /* WebRTCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3818DE6339C4B1784B86957 /* WebRTCClient.swift */; };
+		129AA23F0F2648CEB30692F0 /* Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2B191C17404D46598F98CCFE /* Config.plist */; };
+		FD5E83F0A02C4353AD921097 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 620EF3B5F2E34A62AA8217E8 /* LaunchScreen.storyboard */; };
+		CFC74F71409B4CB38BB2E6DC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26EDB1211417431B8BCDB360 /* Assets.xcassets */; };
+		BEEE9705654A4F309CB37BEF /* WebRTC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D1D7947876E14CF9A25A5B80 /* WebRTC.framework */; };
+		66A71A430A614F1DBE15E942 /* WebRTC.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D1D7947876E14CF9A25A5B80 /* WebRTC.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A63832AD343443AB8010D5B7 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				66A71A430A614F1DBE15E942 /* WebRTC.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		51A93788EDDD42869961A488 /* RCall.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RCall.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AFE449DDB5B34A7990C44A3E /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		430A1E586BEF4F9EB8F598BA /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
+		EE1D73DD23744FC5BAA2F481 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		7DDC718F2AFB4C17BECB9513 /* BackgroundAudioKeeper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundAudioKeeper.swift; sourceTree = "<group>"; };
+		4D486163F996477898165EBC /* CameraService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraService.swift; sourceTree = "<group>"; };
+		650C57CE10724A448384EC8E /* CameraViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraViewController.swift; sourceTree = "<group>"; };
+		433642706E1F4A37A68B8DCD /* CampusViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CampusViewController.swift; sourceTree = "<group>"; };
+		9704DDDCAAF64C888DD8B1A8 /* ChatInputViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatInputViewController.swift; sourceTree = "<group>"; };
+		64200C046A824807976B2FF3 /* MainCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainCoordinator.swift; sourceTree = "<group>"; };
+		C2C0EF0D52604615B024A80A /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		FAB0C5F0A2624E6AAD0FD2AA /* OutgoingMessages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingMessages.swift; sourceTree = "<group>"; };
+		4161E0E542FC4E7187DE529F /* PinViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinViewController.swift; sourceTree = "<group>"; };
+		CBB7D2D4B5984B9BBF94186E /* RealtimeClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealtimeClient.swift; sourceTree = "<group>"; };
+		901DF6C4EB2A48B2AE6884F8 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		1FF0526AC0A34DB9BDC7D24E /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		C56BE932605D4BFEB67BA82D /* ToastPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastPresenter.swift; sourceTree = "<group>"; };
+		1C9E477F65FD4BE5BDEDB659 /* UploadQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadQueue.swift; sourceTree = "<group>"; };
+		E3818DE6339C4B1784B86957 /* WebRTCClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCClient.swift; sourceTree = "<group>"; };
+		2B191C17404D46598F98CCFE /* Config.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Config.plist; sourceTree = "<group>"; };
+		9AB2D9A6528C4C9699DBA247 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		620EF3B5F2E34A62AA8217E8 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
+		26EDB1211417431B8BCDB360 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D1D7947876E14CF9A25A5B80 /* WebRTC.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Frameworks/WebRTC.framework; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		93E3B8E5B88D4256ACCC1CAC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BEEE9705654A4F309CB37BEF /* WebRTC.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AFB95C1BB9164B35A963C39A = {
+			isa = PBXGroup;
+			children = (
+				5EF25BBE30B247E8AF4E7AAE /* Sources */,
+				9F14443F9DAB48BFBFE7223A /* Resources */,
+				26EDB1211417431B8BCDB360 /* Assets.xcassets */,
+				77A2159549114AA4BD1A50D6 /* Frameworks */,
+				39B9930D4A504757B72E0D32 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5EF25BBE30B247E8AF4E7AAE /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				AFE449DDB5B34A7990C44A3E /* APIClient.swift */,
+				430A1E586BEF4F9EB8F598BA /* AppConfig.swift */,
+				EE1D73DD23744FC5BAA2F481 /* AppDelegate.swift */,
+				7DDC718F2AFB4C17BECB9513 /* BackgroundAudioKeeper.swift */,
+				4D486163F996477898165EBC /* CameraService.swift */,
+				650C57CE10724A448384EC8E /* CameraViewController.swift */,
+				433642706E1F4A37A68B8DCD /* CampusViewController.swift */,
+				9704DDDCAAF64C888DD8B1A8 /* ChatInputViewController.swift */,
+				64200C046A824807976B2FF3 /* MainCoordinator.swift */,
+				C2C0EF0D52604615B024A80A /* Models.swift */,
+				FAB0C5F0A2624E6AAD0FD2AA /* OutgoingMessages.swift */,
+				4161E0E542FC4E7187DE529F /* PinViewController.swift */,
+				CBB7D2D4B5984B9BBF94186E /* RealtimeClient.swift */,
+				901DF6C4EB2A48B2AE6884F8 /* SceneDelegate.swift */,
+				1FF0526AC0A34DB9BDC7D24E /* SessionStore.swift */,
+				C56BE932605D4BFEB67BA82D /* ToastPresenter.swift */,
+				1C9E477F65FD4BE5BDEDB659 /* UploadQueue.swift */,
+				E3818DE6339C4B1784B86957 /* WebRTCClient.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		9F14443F9DAB48BFBFE7223A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2B191C17404D46598F98CCFE /* Config.plist */,
+				9AB2D9A6528C4C9699DBA247 /* Info.plist */,
+				620EF3B5F2E34A62AA8217E8 /* LaunchScreen.storyboard */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		77A2159549114AA4BD1A50D6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D1D7947876E14CF9A25A5B80 /* WebRTC.framework */,
+			);
+			sourceTree = "<group>";
+		};
+		39B9930D4A504757B72E0D32 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				51A93788EDDD42869961A488 /* RCall.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A0D6FB4E6A814DB68C70A58E /* RCall */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 261BB130604D48CCB576F858 /* Build configuration list for PBXNativeTarget "RCall" */;
+			buildPhases = (
+				A351B961F2C640ADAFE63153 /* Sources */,
+				93E3B8E5B88D4256ACCC1CAC /* Frameworks */,
+				59BC900536E146F9BA880BC9 /* Resources */,
+				A63832AD343443AB8010D5B7 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RCall;
+			productName = RCall;
+			productReference = 51A93788EDDD42869961A488 /* RCall.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0C9247134C964506BE203CA7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2650;
+				LastUpgradeCheck = 2650;
+				TargetAttributes = {
+					A0D6FB4E6A814DB68C70A58E = {
+						CreatedOnToolsVersion = 26.5;
+					};
+				};
+			};
+			buildConfigurationList = AB110B9B7A164E809BBEEB59 /* Build configuration list for PBXProject "RCall" */;
+			compatibilityVersion = "Xcode 15.0";
+			developmentRegion = ru;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				ru,
+				en,
+				Base,
+			);
+			mainGroup = AFB95C1BB9164B35A963C39A;
+			productRefGroup = 39B9930D4A504757B72E0D32 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A0D6FB4E6A814DB68C70A58E /* RCall */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		59BC900536E146F9BA880BC9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CFC74F71409B4CB38BB2E6DC /* Assets.xcassets in Resources */,
+				129AA23F0F2648CEB30692F0 /* Config.plist in Resources */,
+				FD5E83F0A02C4353AD921097 /* LaunchScreen.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A351B961F2C640ADAFE63153 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1174CFD2B41E472A87D25FBC /* APIClient.swift in Sources */,
+				9608111D75A04818A41D62D7 /* AppConfig.swift in Sources */,
+				F5B95369D2604407886BA397 /* AppDelegate.swift in Sources */,
+				0EF416268DE74913A88CE1A6 /* BackgroundAudioKeeper.swift in Sources */,
+				ACD486CF5CDD4AC18752C0A5 /* CameraService.swift in Sources */,
+				F2381894785140639ABC0535 /* CameraViewController.swift in Sources */,
+				B9CD4BB1D55D4783A7529606 /* CampusViewController.swift in Sources */,
+				1F75F85426E34E559EA977ED /* ChatInputViewController.swift in Sources */,
+				439347222F2240198246BD0C /* MainCoordinator.swift in Sources */,
+				8655D41B13464C3CAEC68594 /* Models.swift in Sources */,
+				77B59190DF07417F9ED55287 /* OutgoingMessages.swift in Sources */,
+				7687DB1222EB423CB003BFF9 /* PinViewController.swift in Sources */,
+				E62685F0526346149CD3416C /* RealtimeClient.swift in Sources */,
+				EB0FCC3C37AF43118D0BF2DC /* SceneDelegate.swift in Sources */,
+				AF253DD4033841D9A43CF177 /* SessionStore.swift in Sources */,
+				F359B1AAE5914A74B2995675 /* ToastPresenter.swift in Sources */,
+				0B3839AF4774409EB2F149A6 /* UploadQueue.swift in Sources */,
+				F6E6893ACA9F42BD9AF62649 /* WebRTCClient.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		7D13C5B9A21B45DF81CBA657 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		EA73E21C6322449A81BEB08B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 6.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		9A17DBCD8D91476D8C2B9092 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = entitlements.plist;
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Frameworks";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.blustery.rcall;
+				PRODUCT_NAME = RCall;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		03B9C05AD635468195518FFB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = entitlements.plist;
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)/Frameworks";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.blustery.rcall;
+				PRODUCT_NAME = RCall;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AB110B9B7A164E809BBEEB59 /* Build configuration list for PBXProject "RCall" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7D13C5B9A21B45DF81CBA657 /* Debug */,
+				EA73E21C6322449A81BEB08B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		261BB130604D48CCB576F858 /* Build configuration list for PBXNativeTarget "RCall" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9A17DBCD8D91476D8C2B9092 /* Debug */,
+				03B9C05AD635468195518FFB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0C9247134C964506BE203CA7 /* Project object */;
+}

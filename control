@@ -1,8 +1,0 @@
-Package: com.blustery.rcall
-Name: RCall
-Version: 1.0.0
-Architecture: iphoneos-arm64
-Description: Native call client.
-Maintainer: Blustery
-Author: Blustery
-Section: Applications

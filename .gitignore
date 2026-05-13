@@ -1,7 +1,7 @@
 .DS_Store
-.theos/
 packages/
 build/
 Payload/
 *.ipa
 *.deb
+*.xcresult
