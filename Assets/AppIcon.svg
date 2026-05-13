@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="120" y1="80" x2="900" y2="940" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f8f1df"/>
+      <stop offset="1" stop-color="#d9c69b"/>
+    </linearGradient>
+    <linearGradient id="lens" x1="340" y1="338" x2="694" y2="700" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#244c3f"/>
+      <stop offset="1" stop-color="#0f221d"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
+  <circle cx="512" cy="548" r="236" fill="#18362d"/>
+  <circle cx="512" cy="548" r="162" fill="url(#lens)"/>
+  <circle cx="512" cy="548" r="78" fill="#f8f1df" opacity=".94"/>
+  <path d="M276 360c0-50 40-90 90-90h56l42-58c13-18 34-29 56-29h72c22 0 43 11 56 29l42 58h32c50 0 90 40 90 90v92c0 30-24 54-54 54s-54-24-54-54v-68H384v68c0 30-24 54-54 54s-54-24-54-54z" fill="#18362d"/>
+  <path d="M704 706c44-38 70-93 70-152s-26-114-70-152" fill="none" stroke="#e34836" stroke-width="50" stroke-linecap="round"/>
+  <path d="M780 786c68-63 106-147 106-236s-38-173-106-236" fill="none" stroke="#e34836" stroke-width="42" stroke-linecap="round" opacity=".88"/>
+  <circle cx="292" cy="742" r="54" fill="#e34836"/>
+</svg>

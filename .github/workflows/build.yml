@@ -1,0 +1,42 @@
+name: Build unsigned IPA
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+
+      - name: Install Theos
+        run: |
+          brew install ldid xz
+          git clone --recursive https://github.com/theos/theos.git "$RUNNER_TEMP/theos"
+          echo "THEOS=$RUNNER_TEMP/theos" >> "$GITHUB_ENV"
+
+      - name: Build app
+        run: |
+          make clean package THEOS="$THEOS" TARGET=iphone:clang:latest:26.0
+
+      - name: Pack unsigned IPA
+        run: |
+          mkdir -p build/Payload
+          cp -R .theos/_/Applications/RCall.app build/Payload/
+          (cd build && zip -qry RCall-unsigned.ipa Payload)
+
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: RCall-unsigned
+          path: build/RCall-unsigned.ipa
+          if-no-files-found: error
