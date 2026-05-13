@@ -8,16 +8,28 @@ protocol CameraViewControllerDelegate: AnyObject {
 final class CameraViewController: UIViewController {
     weak var delegate: CameraViewControllerDelegate?
 
-    private let camera = CameraService()
+    private let camera: CameraService
     private var previewLayer: AVCaptureVideoPreviewLayer?
     private let shutterButton = UIButton(type: .system)
+    private var expectedCaptures = 0
+    private var completedCaptures = 0
+
+    init(camera: CameraService) {
+        self.camera = camera
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) is unavailable")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
         camera.delegate = self
         build()
-        camera.configure()
+        camera.prepare()
     }
 
     override func viewDidLayoutSubviews() {
@@ -80,7 +92,9 @@ final class CameraViewController: UIViewController {
 
     @objc private func capture() {
         shutterButton.isEnabled = false
-        camera.capture()
+        expectedCaptures = AppConfig.cameraBurstCount
+        completedCaptures = 0
+        camera.captureBurst(count: AppConfig.cameraBurstCount, interval: AppConfig.cameraBurstInterval)
     }
 
     @objc private func handlePinch(_ gesture: UIPinchGestureRecognizer) {
@@ -98,11 +112,16 @@ final class CameraViewController: UIViewController {
 extension CameraViewController: CameraServiceDelegate {
     func cameraService(_ service: CameraService, didCaptureJPEG data: Data) {
         delegate?.cameraViewController(self, didCapture: data)
-        dismiss(animated: true)
+        completedCaptures += 1
+        if completedCaptures >= expectedCaptures {
+            dismiss(animated: true)
+        }
     }
 
     func cameraService(_ service: CameraService, didFail error: Error) {
         shutterButton.isEnabled = true
+        expectedCaptures = 0
+        completedCaptures = 0
         ToastPresenter.shared.show("Камера недоступна")
     }
 }

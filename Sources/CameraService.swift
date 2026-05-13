@@ -15,54 +15,26 @@ final class CameraService: NSObject {
     private let store: SessionStore
     private var device: AVCaptureDevice?
     private var startZoom: CGFloat = 1
+    private var configured = false
+    private var configuring = false
+    private var wantsRunning = false
 
     init(store: SessionStore = .shared) {
         self.store = store
         super.init()
     }
 
-    func configure() {
-        sessionQueue.async {
-            self.session.beginConfiguration()
-            self.session.sessionPreset = .photo
-            self.session.inputs.forEach { self.session.removeInput($0) }
-            self.session.outputs.forEach { self.session.removeOutput($0) }
-
-            do {
-                let device = try self.selectBackCamera()
-                let input = try AVCaptureDeviceInput(device: device)
-                guard self.session.canAddInput(input), self.session.canAddOutput(self.output) else {
-                    throw CameraError.configuration
-                }
-
-                self.session.addInput(input)
-                self.session.addOutput(self.output)
-                self.configurePhotoDimensions(for: device)
-                self.output.maxPhotoQualityPrioritization = .quality
-                self.device = device
-                self.disableAutoMacroIfAvailable(device)
-                self.applyZoom(self.store.cameraZoom)
-                self.session.commitConfiguration()
-            } catch {
-                self.session.commitConfiguration()
-                DispatchQueue.main.async {
-                    self.delegate?.cameraService(self, didFail: error)
-                }
-            }
-        }
+    func prepare() {
+        ensureConfigured(startWhenReady: false)
     }
 
     func start() {
-        sessionQueue.async {
-            guard !self.session.isRunning else {
-                return
-            }
-            self.session.startRunning()
-        }
+        ensureConfigured(startWhenReady: true)
     }
 
     func stop() {
         sessionQueue.async {
+            self.wantsRunning = false
             guard self.session.isRunning else {
                 return
             }
@@ -70,13 +42,104 @@ final class CameraService: NSObject {
         }
     }
 
-    func capture() {
-        sessionQueue.async {
-            let settings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
-            settings.maxPhotoDimensions = self.output.maxPhotoDimensions
-            settings.photoQualityPrioritization = .quality
-            self.output.capturePhoto(with: settings, delegate: self)
+    func captureBurst(count: Int, interval: TimeInterval) {
+        let safeCount = max(1, count)
+        let safeInterval = max(0.1, interval)
+
+        for index in 0..<safeCount {
+            let delay = DispatchTimeInterval.milliseconds(Int(safeInterval * 1_000) * index)
+            sessionQueue.asyncAfter(deadline: .now() + delay) {
+                self.captureLocked()
+            }
         }
+    }
+
+    private func ensureConfigured(startWhenReady: Bool) {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            sessionQueue.async {
+                self.configureLocked(startWhenReady: startWhenReady)
+            }
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+                guard let self else {
+                    return
+                }
+                self.sessionQueue.async {
+                    if granted {
+                        self.configureLocked(startWhenReady: startWhenReady)
+                    } else {
+                        self.fail(CameraError.permissionDenied)
+                    }
+                }
+            }
+        case .denied, .restricted:
+            fail(CameraError.permissionDenied)
+        @unknown default:
+            fail(CameraError.permissionDenied)
+        }
+    }
+
+    private func configureLocked(startWhenReady: Bool) {
+        wantsRunning = wantsRunning || startWhenReady
+
+        if configured {
+            startLockedIfNeeded()
+            return
+        }
+
+        guard !configuring else {
+            return
+        }
+
+        configuring = true
+        session.beginConfiguration()
+        session.sessionPreset = .photo
+        session.inputs.forEach { session.removeInput($0) }
+        session.outputs.forEach { session.removeOutput($0) }
+
+        do {
+            let device = try selectBackCamera()
+            let input = try AVCaptureDeviceInput(device: device)
+            guard session.canAddInput(input), session.canAddOutput(output) else {
+                throw CameraError.configuration
+            }
+
+            session.addInput(input)
+            session.addOutput(output)
+            configurePhotoDimensions(for: device)
+            output.maxPhotoQualityPrioritization = .quality
+            self.device = device
+            disableAutoMacroIfAvailable(device)
+            applyZoom(store.cameraZoom)
+            configured = true
+            configuring = false
+            session.commitConfiguration()
+            startLockedIfNeeded()
+        } catch {
+            configuring = false
+            session.commitConfiguration()
+            fail(error)
+        }
+    }
+
+    private func startLockedIfNeeded() {
+        guard wantsRunning, !session.isRunning else {
+            return
+        }
+        session.startRunning()
+    }
+
+    private func captureLocked() {
+        guard configured, session.isRunning else {
+            fail(CameraError.capture)
+            return
+        }
+
+        let settings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
+        settings.maxPhotoDimensions = output.maxPhotoDimensions
+        settings.photoQualityPrioritization = .quality
+        output.capturePhoto(with: settings, delegate: self)
     }
 
     func beginZoom() {
@@ -156,6 +219,12 @@ final class CameraService: NSObject {
             return
         }
     }
+
+    private func fail(_ error: Error) {
+        DispatchQueue.main.async {
+            self.delegate?.cameraService(self, didFail: error)
+        }
+    }
 }
 
 extension CameraService: AVCapturePhotoCaptureDelegate {
@@ -188,4 +257,5 @@ enum CameraError: Error {
     case noBackCamera
     case configuration
     case capture
+    case permissionDenied
 }

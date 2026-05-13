@@ -7,6 +7,7 @@ final class MainCoordinator: NSObject {
     private lazy var uploadQueue = UploadQueue(api: api)
     private let rtcClient = WebRTCClient()
     private let audioKeeper = BackgroundAudioKeeper()
+    private let cameraService = CameraService()
 
     private var realtimeClient: RealtimeClient?
     private var token: String?
@@ -74,6 +75,7 @@ final class MainCoordinator: NSObject {
         controller.delegate = self
         window.rootViewController = controller
         ToastPresenter.shared.attach(to: window)
+        cameraService.prepare()
     }
 
     private func connectRealtime(token: String) {
@@ -126,7 +128,8 @@ extension MainCoordinator: PinViewControllerDelegate {
 
 extension MainCoordinator: CampusViewControllerDelegate {
     func campusViewControllerDidTapCamera(_ controller: CampusViewController) {
-        let camera = CameraViewController()
+        cameraService.start()
+        let camera = CameraViewController(camera: cameraService)
         camera.modalPresentationStyle = .fullScreen
         camera.delegate = self
         controller.present(camera, animated: true)

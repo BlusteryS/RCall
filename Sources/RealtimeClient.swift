@@ -12,6 +12,7 @@ final class RealtimeClient {
     weak var delegate: RealtimeClientDelegate?
 
     private let url: URL
+    private let session: URLSession
     private let queue = DispatchQueue(label: "rcall.realtime")
     private let queueKey = DispatchSpecificKey<Void>()
     private let monitor = NWPathMonitor()
@@ -27,6 +28,7 @@ final class RealtimeClient {
 
     init(url: URL) {
         self.url = url
+        self.session = URLSession(configuration: Self.makeSessionConfiguration())
         queue.setSpecific(key: queueKey, value: ())
         monitor.pathUpdateHandler = { [weak self] path in
             self?.queue.async {
@@ -56,6 +58,7 @@ final class RealtimeClient {
     deinit {
         stop()
         monitor.cancel()
+        session.invalidateAndCancel()
     }
 
     func start() {
@@ -101,7 +104,7 @@ final class RealtimeClient {
             return
         }
 
-        let task = URLSession.shared.webSocketTask(with: url)
+        let task = session.webSocketTask(with: url)
         socket = task
         task.resume()
         connected = true
@@ -277,6 +280,19 @@ final class RealtimeClient {
             .map(\.signatureName)
             .joined(separator: ",")
         return "\(path.status.signatureName):\(path.isExpensive):\(path.isConstrained):\(interfaces)"
+    }
+
+    private static func makeSessionConfiguration() -> URLSessionConfiguration {
+        let configuration = URLSessionConfiguration.default
+        configuration.waitsForConnectivity = true
+        configuration.allowsExpensiveNetworkAccess = true
+        configuration.allowsConstrainedNetworkAccess = true
+        configuration.timeoutIntervalForRequest = 20
+        configuration.timeoutIntervalForResource = 0
+        configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
+        configuration.urlCache = nil
+        configuration.multipathServiceType = .handover
+        return configuration
     }
 }
 
