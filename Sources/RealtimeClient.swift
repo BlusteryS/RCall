@@ -46,6 +46,7 @@ final class RealtimeClient {
 
                 self.connectIfNeeded()
                 if changed {
+                    self.probeSocket()
                     DispatchQueue.main.async {
                         self.delegate?.realtimeClientNetworkPathDidChange(self)
                     }
@@ -200,6 +201,15 @@ final class RealtimeClient {
         for message in queued {
             sendNow(message, socket: socket)
         }
+    }
+
+    private func probeSocket() {
+        guard connected, socket != nil else {
+            return
+        }
+
+        _ = send(.ping)
+        startPongTimeout()
     }
 
     private func handleDisconnect() {

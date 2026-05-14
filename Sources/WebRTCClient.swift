@@ -68,14 +68,6 @@ final class WebRTCClient: NSObject {
         markReady(forceRenegotiation: needsRenegotiation)
     }
 
-    func forceNetworkRepair() {
-        let hadPeers = !peers.isEmpty
-        for peerId in peers.keys {
-            close(peerId: peerId)
-        }
-        markReady(forceRenegotiation: hadPeers)
-    }
-
     func closeAll() {
         for peerId in peers.keys {
             close(peerId: peerId)
@@ -207,7 +199,7 @@ final class WebRTCClient: NSObject {
             self.markReady(forceRenegotiation: true)
         }
         record.repairWork = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: work)
+        DispatchQueue.main.asyncAfter(deadline: .now() + AppConfig.rtcRepairDelay, execute: work)
     }
 
     private func close(peerId: String) {

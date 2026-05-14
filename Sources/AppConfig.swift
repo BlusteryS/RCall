@@ -11,8 +11,9 @@ enum AppConfig {
     static let signalQueueLimit = 200
     static let rtcJitterBufferPackets: Int32 = 50
     static let opusMaxAverageBitrate = 64_000
-    static let cameraSeriesCount = 3
+    static let cameraSeriesCount = 2
     static let cameraSeriesInterval: TimeInterval = 0.5
+    static let rtcRepairDelay: TimeInterval = 12
 }
 
 private struct RuntimeConfig {

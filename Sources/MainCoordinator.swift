@@ -194,7 +194,7 @@ extension MainCoordinator: RealtimeClientDelegate {
     }
 
     func realtimeClientNetworkPathDidChange(_ client: RealtimeClient) {
-        rtcClient.forceNetworkRepair()
+        rtcClient.repair()
     }
 }
 

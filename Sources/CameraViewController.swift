@@ -69,7 +69,7 @@ final class CameraViewController: UIViewController {
         shutterButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(shutterButton)
 
-        configureCaptureButton(seriesButton, title: "3", size: 64, borderWidth: 4)
+        configureCaptureButton(seriesButton, title: String(AppConfig.cameraSeriesCount), size: 64, borderWidth: 4)
         seriesButton.titleLabel?.font = .systemFont(ofSize: 26, weight: .black)
         seriesButton.addTarget(self, action: #selector(captureSeries), for: .touchUpInside)
         seriesButton.translatesAutoresizingMaskIntoConstraints = false
