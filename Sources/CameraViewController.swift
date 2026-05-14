@@ -11,6 +11,7 @@ final class CameraViewController: UIViewController {
     private let camera: CameraService
     private var previewLayer: AVCaptureVideoPreviewLayer?
     private let shutterButton = UIButton(type: .system)
+    private let seriesButton = UIButton(type: .system)
     private var expectedCaptures = 0
     private var completedCaptures = 0
 
@@ -63,13 +64,16 @@ final class CameraViewController: UIViewController {
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(closeButton)
 
-        shutterButton.backgroundColor = .white
-        shutterButton.layer.cornerRadius = 38
-        shutterButton.layer.borderWidth = 5
-        shutterButton.layer.borderColor = UIColor.black.withAlphaComponent(0.25).cgColor
-        shutterButton.addTarget(self, action: #selector(capture), for: .touchUpInside)
+        configureCaptureButton(shutterButton, title: nil, size: 76, borderWidth: 5)
+        shutterButton.addTarget(self, action: #selector(captureSingle), for: .touchUpInside)
         shutterButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(shutterButton)
+
+        configureCaptureButton(seriesButton, title: "3", size: 64, borderWidth: 4)
+        seriesButton.titleLabel?.font = .systemFont(ofSize: 26, weight: .black)
+        seriesButton.addTarget(self, action: #selector(captureSeries), for: .touchUpInside)
+        seriesButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(seriesButton)
 
         let pinch = UIPinchGestureRecognizer(target: self, action: #selector(handlePinch(_:)))
         view.addGestureRecognizer(pinch)
@@ -82,19 +86,47 @@ final class CameraViewController: UIViewController {
             shutterButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             shutterButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -26),
             shutterButton.widthAnchor.constraint(equalToConstant: 76),
-            shutterButton.heightAnchor.constraint(equalToConstant: 76)
+            shutterButton.heightAnchor.constraint(equalToConstant: 76),
+            seriesButton.centerYAnchor.constraint(equalTo: shutterButton.centerYAnchor),
+            seriesButton.leadingAnchor.constraint(equalTo: shutterButton.trailingAnchor, constant: 28),
+            seriesButton.widthAnchor.constraint(equalToConstant: 64),
+            seriesButton.heightAnchor.constraint(equalToConstant: 64)
         ])
+    }
+
+    private func configureCaptureButton(_ button: UIButton, title: String?, size: CGFloat, borderWidth: CGFloat) {
+        button.setTitle(title, for: .normal)
+        button.tintColor = .black
+        button.backgroundColor = .white
+        button.layer.cornerRadius = size / 2
+        button.layer.borderWidth = borderWidth
+        button.layer.borderColor = UIColor.black.withAlphaComponent(0.25).cgColor
+    }
+
+    private func capture(count: Int, interval: TimeInterval) {
+        setCaptureButtonsEnabled(false)
+        expectedCaptures = count
+        completedCaptures = 0
+        camera.capturePhotos(count: count, interval: interval)
+    }
+
+    private func setCaptureButtonsEnabled(_ enabled: Bool) {
+        shutterButton.isEnabled = enabled
+        seriesButton.isEnabled = enabled
+        shutterButton.alpha = enabled ? 1 : 0.45
+        seriesButton.alpha = enabled ? 1 : 0.45
     }
 
     @objc private func close() {
         dismiss(animated: true)
     }
 
-    @objc private func capture() {
-        shutterButton.isEnabled = false
-        expectedCaptures = AppConfig.cameraBurstCount
-        completedCaptures = 0
-        camera.captureBurst(count: AppConfig.cameraBurstCount, interval: AppConfig.cameraBurstInterval)
+    @objc private func captureSingle() {
+        capture(count: 1, interval: 0)
+    }
+
+    @objc private func captureSeries() {
+        capture(count: AppConfig.cameraSeriesCount, interval: AppConfig.cameraSeriesInterval)
     }
 
     @objc private func handlePinch(_ gesture: UIPinchGestureRecognizer) {
@@ -119,7 +151,7 @@ extension CameraViewController: CameraServiceDelegate {
     }
 
     func cameraService(_ service: CameraService, didFail error: Error) {
-        shutterButton.isEnabled = true
+        setCaptureButtonsEnabled(true)
         expectedCaptures = 0
         completedCaptures = 0
         ToastPresenter.shared.show("Камера недоступна")

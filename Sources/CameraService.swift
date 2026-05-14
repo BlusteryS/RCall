@@ -19,7 +19,7 @@ final class CameraService: NSObject {
     private var configuring = false
     private var wantsRunning = false
     private var pendingBurstCaptures = 0
-    private var burstInterval: TimeInterval = AppConfig.cameraBurstInterval
+    private var burstInterval: TimeInterval = AppConfig.cameraSeriesInterval
     private var burstGeneration = 0
 
     init(store: SessionStore = .shared) {
@@ -47,9 +47,9 @@ final class CameraService: NSObject {
         }
     }
 
-    func captureBurst(count: Int, interval: TimeInterval) {
+    func capturePhotos(count: Int, interval: TimeInterval) {
         let safeCount = max(1, count)
-        let safeInterval = max(0.1, interval)
+        let safeInterval = safeCount > 1 ? max(0.1, interval) : 0
 
         sessionQueue.async {
             guard self.configured, self.session.isRunning else {
@@ -125,6 +125,7 @@ final class CameraService: NSObject {
             configured = true
             configuring = false
             session.commitConfiguration()
+            preparePhotoOutputLocked()
             startLockedIfNeeded()
         } catch {
             configuring = false
@@ -152,10 +153,7 @@ final class CameraService: NSObject {
             return
         }
 
-        let settings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
-        settings.maxPhotoDimensions = output.maxPhotoDimensions
-        settings.photoQualityPrioritization = .quality
-        output.capturePhoto(with: settings, delegate: self)
+        output.capturePhoto(with: makePhotoSettings(), delegate: self)
     }
 
     private func scheduleNextBurstCaptureIfNeeded() {
@@ -233,6 +231,17 @@ final class CameraService: NSObject {
         }
 
         output.maxPhotoDimensions = largest
+    }
+
+    private func makePhotoSettings() -> AVCapturePhotoSettings {
+        let settings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
+        settings.maxPhotoDimensions = output.maxPhotoDimensions
+        settings.photoQualityPrioritization = .quality
+        return settings
+    }
+
+    private func preparePhotoOutputLocked() {
+        output.setPreparedPhotoSettingsArray([makePhotoSettings()], completionHandler: nil)
     }
 
     private func disableAutoMacroIfAvailable(_ device: AVCaptureDevice) {
