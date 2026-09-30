@@ -70,10 +70,10 @@ final class BackgroundAudioKeeper {
             self.resetPlayback()
             if !self.interrupted && self.wanted { self.start() }
         })
-        for name in [AVAudioSession.routeChangeNotification, AVAudioSession.mediaServicesWereResetNotification, AVAudioEngine.configurationChangeNotification] {
+        for name in [AVAudioSession.routeChangeNotification, AVAudioSession.mediaServicesWereResetNotification, Notification.Name.AVAudioEngineConfigurationChange] {
             observers.append(center.addObserver(forName: name, object: nil, queue: .main) { [weak self] event in
                 guard let self, self.wanted else { return }
-                if name == AVAudioEngine.configurationChangeNotification {
+                if name == Notification.Name.AVAudioEngineConfigurationChange {
                     guard event.object as? AVAudioEngine === self.engine, !self.engine.isRunning else { return }
                 }
                 self.resetPlayback()
@@ -108,7 +108,7 @@ final class BackgroundAudioKeeper {
 
             if !configured {
                 engine.attach(player)
-                engine.connect(player, to: engine.mainMixerNode, format: format)
+                engine.connect(player, to: engine.mainMixerNode, fromBus: 0, toBus: 0, format: format)
                 configured = true
             }
             engine.prepare()
