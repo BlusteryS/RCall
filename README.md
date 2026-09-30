@@ -15,4 +15,4 @@ xcodebuild \
   build
 ```
 
-The backend URL is stored in `Resources/Config.plist` and must be patched before signing for a real device.
+The backend URL (`https://rcall.tindapp.com`) is bundled in `Resources/Config.plist`. GitHub Actions builds the app with Xcode 27 for iOS 27. The downloaded IPA only needs signing and installation; no backend configuration patch is required. Apple account credentials stay in the local signing environment.

@@ -3,6 +3,6 @@
 <plist version="1.0">
 <dict>
 	<key>APIBaseURL</key>
-	<string>APP_BASE_URL_PLACEHOLDER</string>
+	<string>https://rcall.tindapp.com</string>
 </dict>
 </plist>
