@@ -224,6 +224,11 @@ final class WebRTCClient: NSObject {
 
         record.cancelGraceClose()
         record.cancelRepair()
+        for receiver in record.connection.receivers {
+            if let track = receiver.track as? RTCAudioTrack {
+                AudioOutputPolicy.shared.unregister(track)
+            }
+        }
         record.connection.close()
         notifyConnectionStatus()
     }
@@ -263,7 +268,7 @@ final class WebRTCClient: NSObject {
         defer { session.unlockForConfiguration() }
 
         do {
-            try session.setCategory(.playback, with: [.allowAirPlay, .allowBluetoothA2DP])
+            try session.setCategory(.playback, with: [.allowBluetoothA2DP])
             try session.setMode(.spokenAudio)
             try session.setPreferredSampleRate(48_000)
             try session.setActive(true)
@@ -367,7 +372,11 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove candidates: [RTCIceCandidate]) {}
     func peerConnection(_ peerConnection: RTCPeerConnection, didOpen dataChannel: RTCDataChannel) {}
     func peerConnection(_ peerConnection: RTCPeerConnection, didStartReceivingOn transceiver: RTCRtpTransceiver) {}
-    func peerConnection(_ peerConnection: RTCPeerConnection, didAdd rtpReceiver: RTCRtpReceiver, streams mediaStreams: [RTCMediaStream]) {}
+    func peerConnection(_ peerConnection: RTCPeerConnection, didAdd rtpReceiver: RTCRtpReceiver, streams mediaStreams: [RTCMediaStream]) {
+        if let track = rtpReceiver.track as? RTCAudioTrack {
+            AudioOutputPolicy.shared.register(track)
+        }
+    }
 
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
         DispatchQueue.main.async { [weak self] in

@@ -23,7 +23,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>MinimumOSVersion</key>
-	<string>26.0</string>
+	<string>27.0</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Камера нужна для мгновенной отправки снимков домой.</string>
 	<key>NSMicrophoneUsageDescription</key>
