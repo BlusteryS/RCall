@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-26
+    runs-on: xcode-27
 
     steps:
       - name: Checkout
@@ -14,9 +14,10 @@ jobs:
 
       - name: Select Xcode
         run: |
-          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          sudo xcode-select -s /Applications/Xcode_27.0.app/Contents/Developer
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
+          test "$(xcrun --sdk iphoneos --show-sdk-version | cut -d. -f1)" -ge 27
           xcodebuild -showsdks
 
       - name: Build app
