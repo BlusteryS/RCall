@@ -374,7 +374,11 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
     func peerConnection(_ peerConnection: RTCPeerConnection, didStartReceivingOn transceiver: RTCRtpTransceiver) {}
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd rtpReceiver: RTCRtpReceiver, streams mediaStreams: [RTCMediaStream]) {
         if let track = rtpReceiver.track as? RTCAudioTrack {
-            AudioOutputPolicy.shared.register(track)
+            track.source.volume = 0
+            DispatchQueue.main.async { [weak self] in
+                guard let self, self.peers.values.contains(where: { $0.connection === peerConnection }) else { return }
+                AudioOutputPolicy.shared.register(track)
+            }
         }
     }
 
