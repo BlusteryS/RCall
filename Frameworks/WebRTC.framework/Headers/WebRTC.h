@@ -87,6 +87,7 @@
 #import <WebRTC/RTCTracing.h>
 #import <WebRTC/RTCCertificate.h>
 #import <WebRTC/RTCCryptoOptions.h>
+#import <WebRTC/RTCDtlsFingerprint.h>
 #import <WebRTC/RTCVideoSource.h>
 #import <WebRTC/RTCVideoTrack.h>
 #import <WebRTC/RTCVideoCodecConstants.h>
