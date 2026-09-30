@@ -108,16 +108,10 @@ final class RealtimeClient {
         let task = session.webSocketTask(with: url)
         socket = task
         task.resume()
-        connected = true
-        reconnectAttempt = 0
+        connected = false
         startTimers()
+        startPongTimeout()
         receiveLoop(task)
-
-        DispatchQueue.main.async {
-            self.delegate?.realtimeClientDidConnect(self)
-        }
-
-        flushQueue()
     }
 
     private func receiveLoop(_ task: URLSessionWebSocketTask) {
@@ -158,6 +152,16 @@ final class RealtimeClient {
             return
         }
 
+        if !connected {
+            connected = true
+            reconnectAttempt = 0
+            resetPongTimeout()
+            DispatchQueue.main.async {
+                self.delegate?.realtimeClientDidConnect(self)
+            }
+            flushQueue()
+        }
+
         if case .pong = decoded {
             resetPongTimeout()
         }
@@ -178,6 +182,7 @@ final class RealtimeClient {
             }
 
             self.queue.async {
+                guard self.socket === socket else { return }
                 self.enqueue(message)
                 self.handleDisconnect()
             }
@@ -185,6 +190,8 @@ final class RealtimeClient {
     }
 
     private func enqueue(_ message: OutgoingRealtimeMessage) {
+        // Only completed button signals survive a signaling reconnect.
+        guard case .alarmSegment = message else { return }
         outboundQueue.append(message)
         if outboundQueue.count > AppConfig.signalQueueLimit {
             outboundQueue.removeFirst(outboundQueue.count - AppConfig.signalQueueLimit)
@@ -269,7 +276,7 @@ final class RealtimeClient {
     }
 
     private func startPongTimeout() {
-        pongTimer?.cancel()
+        guard pongTimer == nil else { return }
         let timer = DispatchSource.makeTimerSource(queue: queue)
         timer.schedule(deadline: .now() + AppConfig.pongTimeout)
         timer.setEventHandler { [weak self] in

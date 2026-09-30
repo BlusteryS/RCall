@@ -14,6 +14,11 @@ final class WebRTCClient: NSObject {
     private var peers: [String: PeerRecord] = [:]
     private var rtcConfig: RtcConfig?
     private var rtcEpoch = 0
+    private var watchdog: DispatchSourceTimer?
+
+    deinit {
+        watchdog?.cancel()
+    }
 
     override init() {
         RTCInitializeSSL()
@@ -28,6 +33,12 @@ final class WebRTCClient: NSObject {
 
     func configure(rtc: RtcConfig) {
         rtcConfig = rtc
+        guard watchdog == nil else { return }
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now() + 3, repeating: 3)
+        timer.setEventHandler { [weak self] in self?.inspectMedia() }
+        timer.resume()
+        watchdog = timer
     }
 
     func markReady(forceRenegotiation: Bool = false) {
@@ -60,12 +71,10 @@ final class WebRTCClient: NSObject {
     }
 
     func repair() {
-        var needsRenegotiation = false
         for record in peers.values where !record.isHealthy {
-            close(peerId: record.peerId)
-            needsRenegotiation = true
+            schedulePeerRepair(record.connection)
         }
-        markReady(forceRenegotiation: needsRenegotiation)
+        markReady()
     }
 
     func closeAll() {
@@ -74,20 +83,26 @@ final class WebRTCClient: NSObject {
         }
     }
 
+    @MainActor
     private func handleOffer(from: String, description: RtcSessionDescriptionPayload) async {
         guard description.type == "offer" else {
             return
         }
 
         let record = createPeer(peerId: from, replace: false)
+        guard !record.negotiating else { return }
+        record.negotiating = true
+        defer { record.negotiating = false }
         let remote = RTCSessionDescription(type: .offer, sdp: description.sdp)
 
         do {
             try await record.connection.setRemoteDescriptionAsync(remote)
+            guard peers[from] === record else { return }
             flushPendingCandidates(record)
             let answer = try await record.connection.answer(for: RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil))
             let tuned = RTCSessionDescription(type: .answer, sdp: tuneOpus(answer.sdp))
             try await record.connection.setLocalDescriptionAsync(tuned)
+            guard peers[from] === record else { return }
             delegate?.webRTCClientNeedsSend(
                 .rtcAnswer(
                     to: from,
@@ -95,8 +110,9 @@ final class WebRTCClient: NSObject {
                 )
             )
         } catch {
+            guard peers[from] === record else { return }
             close(peerId: from)
-            markReady()
+            markReady(forceRenegotiation: true)
         }
     }
 
@@ -122,7 +138,6 @@ final class WebRTCClient: NSObject {
     private func createPeer(peerId: String, replace: Bool) -> PeerRecord {
         if let existing = peers[peerId], !replace {
             existing.cancelGraceClose()
-            existing.cancelRepair()
             return existing
         }
 
@@ -191,11 +206,11 @@ final class WebRTCClient: NSObject {
             }
 
             record.repairWork = nil
-            guard !record.isHealthy else {
-                return
+            record.repairAttempt += 1
+            // Request an ICE restart first; keep the receiver alive across short outages.
+            if record.repairAttempt >= 4 {
+                self.close(peerId: record.peerId)
             }
-
-            self.close(peerId: record.peerId)
             self.markReady(forceRenegotiation: true)
         }
         record.repairWork = work
@@ -215,6 +230,31 @@ final class WebRTCClient: NSObject {
 
     private func notifyConnectionStatus() {
         delegate?.webRTCClientDidChangeConnection(connected: peers.values.contains { $0.isHealthy })
+    }
+
+    private func inspectMedia() {
+        for record in peers.values {
+            guard !record.inspecting else { continue }
+            record.inspecting = true
+            record.connection.statistics { [weak self, weak record] report in
+                DispatchQueue.main.async {
+                    guard let self, let record, self.peers[record.peerId] === record else { return }
+                    record.inspecting = false
+                    let bytes = report.statistics.values
+                        .filter { $0.type == "inbound-rtp" && ($0.values["kind"] as? String) == "audio" }
+                        .reduce(UInt64(0)) { $0 + (($1.values["bytesReceived"] as? NSNumber)?.uint64Value ?? 0) }
+                    let now = ProcessInfo.processInfo.systemUptime
+                    if bytes > record.lastMediaBytes {
+                        record.lastMediaBytes = bytes
+                        record.lastMediaAt = now
+                        record.repairAttempt = 0
+                        record.cancelRepair()
+                    } else if now - record.lastMediaAt > 20 {
+                        self.schedulePeerRepair(record.connection)
+                    }
+                }
+            }
+        }
     }
 
     private func configureAudioSession() {
@@ -286,6 +326,11 @@ private final class PeerRecord {
     var pendingCandidates: [RTCIceCandidate] = []
     var graceClose: DispatchWorkItem?
     var repairWork: DispatchWorkItem?
+    var repairAttempt = 0
+    var negotiating = false
+    var inspecting = false
+    var lastMediaBytes: UInt64 = 0
+    var lastMediaAt = ProcessInfo.processInfo.systemUptime
 
     init(peerId: String, connection: RTCPeerConnection) {
         self.peerId = peerId
@@ -293,7 +338,11 @@ private final class PeerRecord {
     }
 
     var isHealthy: Bool {
-        connection.connectionState == .connected ||
+        guard connection.iceConnectionState != .disconnected,
+              connection.iceConnectionState != .failed,
+              connection.connectionState != .failed,
+              connection.connectionState != .closed else { return false }
+        return connection.connectionState == .connected ||
             connection.iceConnectionState == .connected ||
             connection.iceConnectionState == .completed
     }
@@ -321,26 +370,26 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd rtpReceiver: RTCRtpReceiver, streams mediaStreams: [RTCMediaStream]) {}
 
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
-        notifyConnectionStatus()
-        if newState == .connected || newState == .completed {
-            peers.values.first(where: { $0.connection === peerConnection })?.cancelRepair()
-        }
-        if newState == .failed || newState == .disconnected {
-            schedulePeerRepair(peerConnection)
+        DispatchQueue.main.async { [weak self] in
+            self?.notifyConnectionStatus()
+            if newState == .failed || newState == .disconnected {
+                self?.schedulePeerRepair(peerConnection)
+            }
         }
     }
 
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCPeerConnectionState) {
-        notifyConnectionStatus()
-        if newState == .connected {
-            peers.values.first(where: { $0.connection === peerConnection })?.cancelRepair()
-        }
-        if newState == .failed || newState == .disconnected {
-            schedulePeerRepair(peerConnection)
+        DispatchQueue.main.async { [weak self] in
+            self?.notifyConnectionStatus()
+            if newState == .failed || newState == .disconnected {
+                self?.schedulePeerRepair(peerConnection)
+            }
         }
     }
 
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
+        DispatchQueue.main.async { [weak self] in
+        guard let self else { return }
         guard let record = peers.values.first(where: { $0.connection === peerConnection }) else {
             return
         }
@@ -355,6 +404,7 @@ extension WebRTCClient: RTCPeerConnectionDelegate {
                 )
             )
         )
+        }
     }
 }
 
