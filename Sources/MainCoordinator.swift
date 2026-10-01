@@ -44,22 +44,24 @@ final class MainCoordinator: NSObject {
     }
 
     private func restoreSession(token: String) async {
+        // Signaling supplies RTC configuration too; HTTP must not delay the call.
+        await MainActor.run { connectRealtime(token: token) }
         do {
             let bootstrap = try await api.bootstrap(token: token)
             await MainActor.run {
                 rtcClient.configure(rtc: bootstrap.rtc)
-                connectRealtime(token: token)
             }
         } catch APIClientError.server(let status, _) where status == 401 {
             await MainActor.run {
                 store.resetSession()
                 self.token = nil
+                realtimeClient?.stop()
+                realtimeClient = nil
+                rtcClient.closeAll()
                 showPin()
             }
         } catch {
-            await MainActor.run {
-                connectRealtime(token: token)
-            }
+            // WebSocket independently restores the session and RTC configuration.
         }
     }
 
@@ -179,6 +181,7 @@ extension MainCoordinator: ChatInputViewControllerDelegate {
 
 extension MainCoordinator: RealtimeClientDelegate {
     func realtimeClientDidConnect(_ client: RealtimeClient) {
+        guard realtimeClient === client else { return }
         rtcClient.markReady()
         if let token {
             uploadQueue.drain(token: token)
@@ -186,14 +189,17 @@ extension MainCoordinator: RealtimeClientDelegate {
     }
 
     func realtimeClient(_ client: RealtimeClient, didReceive message: RealtimeMessage) {
+        guard realtimeClient === client else { return }
         rtcClient.handle(message)
     }
 
     func realtimeClientDidDisconnect(_ client: RealtimeClient) {
+        guard realtimeClient === client else { return }
         rtcClient.repair()
     }
 
     func realtimeClientNetworkPathDidChange(_ client: RealtimeClient) {
+        guard realtimeClient === client else { return }
         rtcClient.repair()
     }
 }

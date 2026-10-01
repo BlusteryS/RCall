@@ -78,7 +78,7 @@ final class WebRTCClient: NSObject {
     }
 
     func closeAll() {
-        for peerId in peers.keys {
+        for peerId in Array(peers.keys) {
             close(peerId: peerId)
         }
     }
@@ -117,9 +117,9 @@ final class WebRTCClient: NSObject {
     }
 
     private func handleCandidate(from: String, payload: RtcIceCandidatePayload) {
-        guard let record = peers[from] else {
-            return
-        }
+        // Offer handling is asynchronous; trickled ICE may arrive before its task runs.
+        guard rtcConfig != nil else { return }
+        let record = createPeer(peerId: from, replace: false)
 
         let candidate = RTCIceCandidate(
             sdp: payload.candidate,
@@ -206,6 +206,9 @@ final class WebRTCClient: NSObject {
             }
 
             record.repairWork = nil
+            if record.isHealthy && ProcessInfo.processInfo.systemUptime - record.lastMediaAt < 20 {
+                return
+            }
             record.repairAttempt += 1
             // Request an ICE restart first; keep the receiver alive across short outages.
             if record.repairAttempt >= 4 {
